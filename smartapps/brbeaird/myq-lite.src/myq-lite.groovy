@@ -12,9 +12,9 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 5/29/2017
- *  SmartApp version: 2.0.1*
- *  Door device version: 2.1.1*
+ *  Last Updated : 11/28/2017
+ *  SmartApp version: 2.0.3*
+ *  Door device version: 2.1.2*
  *  Door-no-sensor device version: 1.1.1*
  *  Light device version: 1.0.1*
  */
@@ -48,7 +48,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.0.1"
+    state.thisSmartAppVersion = "2.0.3"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false) {
@@ -68,8 +68,9 @@ def prefListDevices() {
     if (forceLogin()) {
 		def doorList = getDoorList()		
 		if ((state.doorList) || (state.lightList)){
-        	if ((state.doorList)) {
-                return dynamicPage(name: "prefListDevices",  title: "Devices", nextPage:"prefSensor1", install:false, uninstall:true) {
+        	def nextPage = "prefSensor1"
+            if (!state.doorList){nextPage = "summary"}  //Skip to summary if there are no doors to handle            
+                return dynamicPage(name: "prefListDevices",  title: "Devices", nextPage:nextPage, install:false, uninstall:true) {
                     if (state.doorList) {
                         section("Select which garage door/gate to use"){
                             input(name: "doors", type: "enum", required:false, multiple:true, metadata:[values:state.doorList])
@@ -81,9 +82,6 @@ def prefListDevices() {
                         }
                     } 
                 }
-            } 
-        
-        
         
         }else {
 			def devList = getDeviceList()
@@ -235,18 +233,20 @@ def initialize() {
     
 	// Create selected devices
 	def doorsList = getDoorList()
-	def lightsList = state.lightList    
+	def lightsList = state.lightList
     
-    def firstDoor = doors[0]        
-    //Handle single door (sometimes it's just a dumb string thanks to the simulator)
-    if (doors instanceof String)
-    firstDoor = doors   
-    
-	//Create door devices
-    createChilDevices(firstDoor, door1Sensor, doorsList[firstDoor], prefDoor1PushButtons)
-    if (doors[1]) createChilDevices(doors[1], door2Sensor, doorsList[doors[1]], prefDoor2PushButtons)
-    if (doors[2]) createChilDevices(doors[2], door3Sensor, doorsList[doors[2]], prefDoor3PushButtons)
-    if (doors[3]) createChilDevices(doors[3], door4Sensor, doorsList[doors[3]], prefDoor4PushButtons)    
+    if (doors != null){
+        def firstDoor = doors[0]        
+        //Handle single door (sometimes it's just a dumb string thanks to the simulator)
+        if (doors instanceof String)
+        firstDoor = doors   
+
+        //Create door devices
+        createChilDevices(firstDoor, door1Sensor, doorsList[firstDoor], prefDoor1PushButtons)
+        if (doors[1]) createChilDevices(doors[1], door2Sensor, doorsList[doors[1]], prefDoor2PushButtons)
+        if (doors[2]) createChilDevices(doors[2], door3Sensor, doorsList[doors[2]], prefDoor3PushButtons)
+        if (doors[3]) createChilDevices(doors[3], door4Sensor, doorsList[doors[3]], prefDoor4PushButtons)    
+    }
     
     //Create light devices
     def selectedLights = getSelectedDevices("lights")    
@@ -630,8 +630,8 @@ private getDoorList() {
     def deviceList = [:]
 	apiGet("/api/v4/userdevicedetails/get", []) { response ->
 		if (response.status == 200) {
-        //log.debug "response data: " + response.data.Devices
-        //sendAlert("response data: " + response.data.Devices)
+            //log.debug "response data: " + response.data
+            //sendAlert("response data: " + response.data.Devices)
 			response.data.Devices.each { device ->
 				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway), 17 = Garage Door Opener WGDO
 				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17) {
@@ -782,11 +782,18 @@ private getApiAppID() {
 // HTTP GET call
 private apiGet(apiPath, apiQuery = [], callback = {}) {	
 	// set up query
+    def myHeaders = ""
+    
+    
 	apiQuery = [ appId: getApiAppID() ] + apiQuery
-	if (state.session.securityToken) { apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] }
+	if (state.session.securityToken) { 
+    	apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] 
+        myHeaders = [ "SecurityToken": state.session.securityToken,                        
+                         "MyQApplicationId": getApiAppID() ]
+        }
        
 	try {
-		httpGet([ uri: getApiURL(), path: apiPath, query: apiQuery ]) { response -> callback(response) }
+		httpGet([ uri: getApiURL(), path: apiPath, headers: myHeaders, query: apiQuery ]) { response -> callback(response) }
 	}	catch (SocketException e)	{
 		//sendAlert("API Error: $e")
         log.debug "API Error: $e"
@@ -799,12 +806,18 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 	apiBody = [ ApplicationId: getApiAppID() ] + apiBody
 	if (state.session.securityToken) { apiBody = apiBody + [SecurityToken: state.session.securityToken ] }
     
-	// set up query
+	def myHeaders = ""  
+    
+    // set up query
 	def apiQuery = [ appId: getApiAppID() ]
-	if (state.session.securityToken) { apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] }
+	if (state.session.securityToken) { 
+    	apiQuery = apiQuery + [SecurityToken: state.session.securityToken ]
+        myHeaders = [ "SecurityToken": state.session.securityToken,                        
+                         "MyQApplicationId": getApiAppID() ]
+    }
     
 	try {
-		httpPut([ uri: getApiURL(), path: apiPath, contentType: "application/json; charset=utf-8", body: apiBody, query: apiQuery ]) { response -> callback(response) }
+		httpPut([ uri: getApiURL(), path: apiPath, headers: myHeaders, contentType: "application/json; charset=utf-8", body: apiBody, query: apiQuery ]) { response -> callback(response) }
 	} catch (SocketException e)	{
 		log.debug "API Error: $e"
 	}
