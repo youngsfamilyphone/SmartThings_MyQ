@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 11/28/2017
+ *  Last Updated : 6/6/2017
  *
  */
 metadata {
@@ -21,7 +21,7 @@ metadata {
 		capability "Door Control"
 		capability "Contact Sensor"
 		capability "Refresh"
-		capability "Polling"				// SmartThings will occaisionally poll us (despite their assertions to the contrary). We don't really need this anymore.
+		capability "Polling"  // SmartThings will occaisionally poll us (despite their assertions to the contrary). We don't really need this anymore.
 
 		capability "Actuator"
 		capability "Switch"
@@ -46,16 +46,13 @@ metadata {
 		multiAttributeTile(name:"door", type: "lighting", width: 6, height: 4, canChangeIcon: false) {
 			tileAttribute ("device.door", key: "PRIMARY_CONTROL") {
 				attributeState "unknown", label:'${name}', icon:"st.doors.garage.garage-closed",    backgroundColor:"#ffa81e", nextState: "closing"
-				attributeState "closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#ffffff"
+				attributeState "closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#00a0dc"
 				attributeState "open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#e86d13"
 				attributeState "opening", label:'${name}', 								 icon:"st.doors.garage.garage-opening", backgroundColor:"#cec236"
 				attributeState "closing", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
 				attributeState "waiting", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
 				attributeState "stopped", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-closing", backgroundColor:"#1ee3ff"
-			}
-            tileAttribute("device.lastActivity", key: "SECONDARY_CONTROL") {
-        		attributeState("lastActivity", label:'Last Activity: ${currentValue}', defaultState: true)
-    		}
+			}			
 		}
 
 // Note that you can refresh this device simply by tapping the "lastActivity" string in the MultiTile now.
@@ -70,7 +67,10 @@ metadata {
 		standardTile("switch", "device.switch") {
 			state("on", label:'${name}', action: "switch.on",  backgroundColor:"#ffa81e")
 			state("off", label:'${name}', action: "switch.off", backgroundColor:"#79b821")
-		}		
+		}
+//		valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
+//			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
+//		}
         standardTile("openBtn", "device.OpenButton", width: 3, height: 3) {
             state "normal", label: 'Open', icon: "st.doors.garage.garage-open", backgroundColor: "#e86d13", action: "open", nextState: "opening"
             state "opening", label: 'Opening', icon: "st.doors.garage.garage-opening", backgroundColor: "#cec236", action: "open"
@@ -216,5 +216,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "2.1.2"
+	return "2.1.1"
 }
