@@ -1,0 +1,69 @@
+{
+    "namespace": "brbeaird",
+    "repoOwner": "brbeaird",
+    "repoName": "SmartThings_MyQ",
+    "repoBranch": "master",
+    "name": "MyQ Lite",
+    "author": "Brian Beaird",
+    "description": "SmartThings integration with MyQ (Chamerlain/Liftmaster)",
+    "category": "My Apps",
+    "bannerUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/MyQBanner.png",
+    "forumUrl": "https://community.smartthings.com/t/release-myq-lite-door-and-lamp-control-for-liftmaster-chamberlain",
+    "docUrl": "https://github.com/brbeaird/SmartThings_MyQ/blob/master/README.md",
+    "releaseType": "production",
+    "keywords": ["myq", "garage", "garage door", "door", "chamberlain", "liftmaster", "car"],
+    "notes": "Nothing to show here (yet)",
+    "smartApps": {
+        "parent": {
+            "name": "MyQ Lite",
+            "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
+            "published": true,
+            "oAuth": true,
+            "version": "2.0.3",
+            "appSettings": {},
+            "appUrl": "smartapps/brbeaird/myq-lite.src/myq-lite.groovy"
+        },
+        "children": []
+    },
+    "deviceHandlers": [{
+            "name": "MyQ Garage Door Opener",
+            "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
+            "published": true,
+            "oAuth": false,
+            "appUrl": "devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy",
+            "appSettings": {},
+            "version": "2.1.2",
+            "optional": false
+    },
+    {
+	        "name": "MyQ Garage Door Opener-NoSensor",
+	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
+	        "published": true,
+	        "oAuth": false,
+	        "appUrl": "devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy",
+	        "appSettings": {},
+	        "version": "1.1.1",
+	        "optional": false
+	    },
+	    {
+	        "name": "MyQ Light Controller",
+	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
+	        "published": true,
+	        "oAuth": false,
+	        "appUrl": "devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy",
+	        "appSettings": {},
+	        "version": "1.0.1",
+	        "optional": true
+	    },
+	    {
+	        "name": "Momentary Button Tile",
+	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
+	        "published": true,
+	        "oAuth": false,
+	        "appUrl": "devicetypes/smartthings/momentary-button-tile.src/momentary-button-tile.groovy",
+	        "appSettings": {},
+	        "version": "1.0.0",
+	        "optional": false
+	    }
+        ]
+}
